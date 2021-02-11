@@ -6,7 +6,7 @@ window.addEventListener('load', (event) => {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
-    const ws = new WebSocket("ws://localhost:3000");
+    const ws = new WebSocket("ws://34.107.39.66:3000");
 
     const vessels = {};
     const circles = {};
