@@ -8,31 +8,16 @@ app.use(bodyParser.json());  // parse application/json
 const cors = require('cors');
 app.use(cors());
 
+app.use(express.static('public'));
+
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('AIS.sqlite');
+const db = new sqlite3.Database('AIS6.sqlite');
 
 const csv = require('csv-parser');
 const fs = require('fs');
 
 db.serialize(() => {
-    db.run(`CREATE TABLE IF NOT EXISTS vessels (timestamp TEXT,
-        mmsi TEXT,
-        imo TEXT,
-        navigational_status TEXT,
-        longitude TEXT,
-        latitude TEXT,
-        heading TEXT,
-        cog TEXT,
-        sog TEXT,
-        ship_name TEXT,
-        call_sign TEXT,
-        ship_type TEXT,
-        draught TEXT,
-        size_bow TEXT,
-        size_stern TEXT,
-        size_port TEXT,
-        size_starboard TEXT,
-        destination TEXT)`);
+    db.run(`CREATE TABLE IF NOT EXISTS vessels (timestamp TEXT,mmsi TEXT,imo TEXT,navigational_status TEXT,longitude TEXT,latitude TEXT,heading TEXT,cog TEXT,sog TEXT,ship_name TEXT,call_sign TEXT,ship_type TEXT,draught TEXT,size_bow TEXT,size_stern TEXT,size_port TEXT,size_starboard TEXT,destination TEXT)`);
 
     const results = [];
 
@@ -41,13 +26,30 @@ db.serialize(() => {
         .on('data', (data) => results.push(data))
         .on('end', () => {
             // console.log(results);
-            // ,mmsi,imo,navigational_status,longitude,latitude,heading,cog,sog,ship_name,call_sign,ship_type,draught,size_bow,size_stern,size_port,size_starboard,destination
-            // const stmt = db.prepare();
-            results.forEach((result) => {
-                db.run(`INSERT INTO vessels VALUES ($timestamp),($mmsi),($imo),($navigational_status),($longitude),($latitude),($heading),($cog),($sog),($ship_name),($call_sign),($ship_type),($draught),($size_bow),($size_stern),($size_port),($size_starboard),($destination)`, { result });
-            });
+            const stmt = db.prepare(`INSERT INTO vessels(timestamp,mmsi,imo,navigational_status,longitude,latitude,heading,cog,sog,ship_name,call_sign,ship_type,draught,size_bow,size_stern,size_port,size_starboard,destination) 
+                                                  VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
+                results.forEach((result) => {
+                // stmt.run(result.timestamp,
+                //     result.mmsi,
+                //     result.imo,
+                //     result.navigational_status,
+                //     result.longitude,
+                //     result.latitude,
+                //     result.heading,
+                //     result.cog,
+                //     result.sog,
+                //     result.ship_name,
+                //     result.call_sign,
+                //     result.ship_type,
+                //     result.draught,
+                //     result.size_bow,
+                //     result.size_port,
+                //     result.size_starboard,
+                //     result.destination);
+                stmt.run([result]);
 
-            // stmt.finalize();
+            });
+            stmt.finalize();
         });
 });
 
