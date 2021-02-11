@@ -1,0 +1,18 @@
+#mapId {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    left: 0px;
+}
+
+#timestampId {
+    position: absolute;
+    bottom: 5px;
+    left: 5px;
+    z-index: 2000;
+    font-size: 15px;
+    font-family: sans-serif;
+    color: black;
+    background-color: white;
+}
