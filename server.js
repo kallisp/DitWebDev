@@ -9,7 +9,7 @@ const cors = require('cors');
 app.use(cors());
 
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('AIS2.sqlite');
+const db = new sqlite3.Database('AIS.sqlite');
 
 const csv = require('csv-parser');
 const fs = require('fs');
@@ -36,11 +36,11 @@ db.serialize(() => {
 
     const results = [];
 
-    fs.createReadStream('day_test.csv')
+    fs.createReadStream('day.csv')
         .pipe(csv())
         .on('data', (data) => results.push(data))
         .on('end', () => {
-            console.log(results);
+            // console.log(results);
             // ,mmsi,imo,navigational_status,longitude,latitude,heading,cog,sog,ship_name,call_sign,ship_type,draught,size_bow,size_stern,size_port,size_starboard,destination
             // const stmt = db.prepare();
             results.forEach((result) => {
