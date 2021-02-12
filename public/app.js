@@ -1,12 +1,12 @@
 window.addEventListener('load', (event) => {
 
-    const map = L.map('mapId').setView([37.90, 23.60], 10.5);
+    const map = L.map('mapId').setView([37.90, 23.60], 11.2);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
-    const ws = new WebSocket("ws://34.107.39.66:3000");
+    const ws = new WebSocket("ws://localhost:3000");
 
     const vessels = {};
     const circles = {};
@@ -25,7 +25,7 @@ window.addEventListener('load', (event) => {
     });
 
     ws.addEventListener('message', (event) => {
-        console.log(`Server sent message: ${event.data}`);
+        // console.log(`Server sent message: ${event.data}`);
         let msg = [];
         try {
             msg = JSON.parse(event.data);
@@ -79,7 +79,7 @@ window.addEventListener('load', (event) => {
                     color: '#E04836',
                     fillColor: 'white',
                     fillOpacity: 0.3,
-                    radius: 4,
+                    radius: 5,
                     weight: 1.5
                 }).addTo(map);
 
