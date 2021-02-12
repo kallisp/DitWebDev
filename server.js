@@ -79,19 +79,15 @@ app.listen(wsPort, function () {
                 const msg = JSON.stringify(rows);
 
                 // ws.getWss().clients
-
+                if (ws.readyState == ws.OPEN){
                 ws.send(msg);
                 currentSec += 60;
+                }
             });
         } catch (ex) {
             console.error(ex);
         }
     };
-
-    // app.get('/', function (req, res, next) {
-    //     console.log('get route', req.testing);
-    //     res.end();
-    // });
 
     app.ws('/', (ws, req) => {
         console.log('Ws server connection has opened.');
