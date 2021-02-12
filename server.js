@@ -11,7 +11,7 @@ app.use(cors());
 app.use(express.static('public'));
 
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('AIS6.sqlite');
+const db = new sqlite3.Database('AIS.sqlite');
 
 const csv = require('csv-parser');
 const fs = require('fs');
@@ -25,10 +25,10 @@ db.serialize(() => {
         .pipe(csv())
         .on('data', (data) => results.push(data))
         .on('end', () => {
-            // console.log(results);
+            //console.log(results);
             const stmt = db.prepare(`INSERT INTO vessels(timestamp,mmsi,imo,navigational_status,longitude,latitude,heading,cog,sog,ship_name,call_sign,ship_type,draught,size_bow,size_stern,size_port,size_starboard,destination) 
                                                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
-                results.forEach((result) => {
+            results.forEach((result) => {
                 // stmt.run(result.timestamp,
                 //     result.mmsi,
                 //     result.imo,
@@ -53,7 +53,6 @@ db.serialize(() => {
         });
 });
 
-// app.use(express.static('public'));
 let currentSec = 0;
 
 const wsPort = 3000;
@@ -61,7 +60,8 @@ app.listen(wsPort, function () {
     console.log(`Server running at ${wsPort}`);
 
     function query(ws) {
-        const q = `select *, (hour*3600)+(min*60)+sec AS total_sec 
+        try {
+            const q = `select *, (hour*3600)+(min*60)+sec AS total_sec 
                     FROM (select CAST(substr(time(timestamp),1,2) AS INTEGER) AS hour, 
                     CAST(substr(time(timestamp),4,2) AS INTEGER) AS min,
                     CAST(substr(time(timestamp),7,2) AS INTEGER) AS sec,
@@ -70,16 +70,22 @@ app.listen(wsPort, function () {
                     from vessels)                    
                     where (total_sec>=${currentSec} AND total_sec<(${currentSec}+60))`;
 
-        db.all(q, (err, rows) => {
-            if (err) {
-                // res.json({'message':'failure','code':err});
-                console.error(err);
-                return;
-            }
-            const msg = JSON.stringify(rows);
-            ws.send(msg);
-            currentSec += 60;
-        });
+            db.all(q, (err, rows) => {
+                if (err) {
+                    // res.json({'message':'failure','code':err});
+                    console.error(err);
+                    return;
+                }
+                const msg = JSON.stringify(rows);
+
+                // ws.getWss().clients
+
+                ws.send(msg);
+                currentSec += 60;
+            });
+        } catch (ex) {
+            console.error(ex);
+        }
     };
 
     // app.get('/', function (req, res, next) {
@@ -89,10 +95,17 @@ app.listen(wsPort, function () {
 
     app.ws('/', (ws, req) => {
         console.log('Ws server connection has opened.');
-        setInterval(() => {
-            query(ws);
-        }, 1000);
-
+        try {
+            setInterval(() => {
+                expressWs?.getWss()?.clients.forEach(c=>{
+                   query(c);
+                })
+            //   console.log(expressWs?.getWss()?.clients);
+                // query(ws);
+            }, 1000);
+        } catch (ex) {
+            console.error(ex);
+        }
         // ws.setInterval(query, 1000);
         // try {
         //     const sentMsg = setInterval(query, 1000);
@@ -113,6 +126,7 @@ app.listen(wsPort, function () {
         ws.on('close', function () {
             console.log('Ws server connection was closed.');
         });
+        ws.on('error', e=> console.log(e));
     });
 
 });
