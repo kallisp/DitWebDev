@@ -15,15 +15,9 @@ const wsPort = 3000;
 function query(ws, currentSec, success) {
     const q = `SELECT mmsi AS id, imo, navigational_status, longitude AS lon, latitude AS lat, heading, cog, sog, ship_name AS name, call_sign, ship_type, draught, size_bow, size_stern, size_port, size_starboard, destination, strftime('%s',timestamp) AS timestamp
                 FROM
-                    (SELECT *, (hour*3600)+(min*60)+sec AS total_sec 
-                    FROM
-                        (SELECT CAST(strftime('%H',timestamp) AS INTEGER) AS hour, 
-                                CAST(strftime('%M',timestamp) AS INTEGER) AS min,
-                                CAST(strftime('%S',timestamp) AS INTEGER) AS sec, 
-                                mmsi, imo, navigational_status, longitude, latitude, heading, cog, sog, Ship_name, call_sign, ship_type, draught, size_bow, size_stern, size_port, size_starboard, destination, timestamp
-                        FROM vessels)                    
+                    (SELECT *, (CAST(strftime('%H',timestamp) AS INTEGER)*3600 + CAST(strftime('%M',timestamp) AS INTEGER)*60 + CAST(strftime('%S',timestamp) AS INTEGER)) AS total_sec 
+                    FROM vessels                    
                     WHERE (total_sec>=${currentSec} AND total_sec<(${currentSec}+60)))`;
-
 
     db.all(q, (err, rows) => {
         if (err) {
