@@ -49,8 +49,8 @@ app.ws('/', (ws, req) => {
         console.error(err);
     };
 
-    ws.on('close', () => {
-        console.log('Client connection was closed.');
+    ws.on('close', (code,reason) => {
+        console.log(`Client connection was closed with code ${code} and reason ${reason}.`);
     });
 
     ws.on('error', (event) => {
@@ -59,6 +59,6 @@ app.ws('/', (ws, req) => {
 });
 
 app.listen(wsPort, () => {
-    console.log(`Server running at port ${wsPort}`);
+    console.log(`Server running on port ${wsPort}`);
 });
 
